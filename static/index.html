@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>YOLO26 Person Detection</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        input {
+            margin: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        #status {
+            margin: 20px;
+            font-weight: bold;
+        }
+
+        #resultVideo {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <h1>YOLO26 Person Detection</h1>
+
+        <p>
+            Upload a video and detect people using YOLO26n.
+        </p>
+
+        <input
+            type="file"
+            id="videoInput"
+            accept="video/*"
+        >
+
+        <br>
+
+        <button id="processButton">
+            Process Video
+        </button>
+
+        <p id="status"></p>
+
+        <video
+            id="resultVideo"
+            controls
+            style="display: none;"
+        ></video>
+
+    </div>
+
+
+    <script>
+
+        const videoInput =
+            document.getElementById("videoInput");
+
+        const processButton =
+            document.getElementById("processButton");
+
+        const status =
+            document.getElementById("status");
+
+        const resultVideo =
+            document.getElementById("resultVideo");
+
+
+        processButton.addEventListener(
+            "click",
+            async function () {
+
+                const file = videoInput.files[0];
+
+
+                if (!file) {
+
+                    status.textContent =
+                        "Please select a video.";
+
+                    return;
+                }
+
+
+                status.textContent =
+                    "Processing video...";
+
+                processButton.disabled = true;
+
+
+                const formData = new FormData();
+
+                formData.append("file", file);
+
+
+                try {
+
+                    const response = await fetch(
+                        "/upload",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+
+                    if (!response.ok) {
+
+                        const errorText =
+                            await response.text();
+
+                        console.error(
+                            "Server error:",
+                            errorText
+                        );
+
+                        status.textContent =
+                            "Error while processing video.";
+
+                        processButton.disabled = false;
+
+                        return;
+                    }
+
+
+                    const videoBlob =
+                        await response.blob();
+
+
+                    const videoUrl =
+                        URL.createObjectURL(videoBlob);
+                    resultVideo.src = videoUrl;
+                    resultVideo.style.display = "block";
+                    status.textContent =
+                        "Done!";
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    status.textContent =
+                        "Connection error.";
+
+                }
+                processButton.disabled = false;
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

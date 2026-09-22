@@ -15,14 +15,14 @@ os.makedirs("outputs", exist_ok=True)
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return FileResponse("static/index.html")
 
 
 @app.post("/upload")
 def upload_video(file: UploadFile):
 
     input_path = f"uploads/{file.filename}"
-    output_path = f"outputs/annotated.mp4"
+    output_path = "outputs/annotated.mp4"
 
     with open(input_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)

@@ -1,6 +1,11 @@
 .venv/
 __pycache__/
 runs/
-outputs/*
-uploads/*
+outputs/
+uploads/
+.idea/
+annotated.mp4
+bus.jpg
+yolo.zip
+yolo26n.pt
 .DS_Store
