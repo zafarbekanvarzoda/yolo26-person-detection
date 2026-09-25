@@ -3,6 +3,8 @@ import cv2
 
 
 model = YOLO("yolo26n.pt")
+
+
 def process_video(input_path, output_path):
 
     print("PROCESS VIDEO STARTED")
@@ -26,10 +28,10 @@ def process_video(input_path, output_path):
 
     timeline = []
 
-    previous_count = -1
     max_people = 0
 
     frame_number = 0
+    last_second = -1
 
     while True:
 
@@ -74,16 +76,17 @@ def process_video(input_path, output_path):
         if people_count > max_people:
             max_people = people_count
 
-        if people_count != previous_count:
+        current_time = (frame_number - 1) / fps
+        current_second = int(current_time)
 
-            current_time = frame_number / fps
+        if current_second != last_second:
 
             timeline.append({
-                "time": round(current_time, 1),
+                "time": current_second,
                 "people": people_count
             })
 
-            previous_count = people_count
+            last_second = current_second
 
         out.write(frame)
 
@@ -95,4 +98,3 @@ def process_video(input_path, output_path):
         "max_people": max_people,
         "timeline": timeline
     }
-
