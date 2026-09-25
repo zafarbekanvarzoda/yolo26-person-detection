@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse
 import shutil
 import os
 
@@ -27,13 +28,23 @@ def upload_video(file: UploadFile):
     with open(input_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    process_video(
+    result = process_video(
         input_path,
         output_path
     )
 
+    return {
+        "video_url": "/video",
+        "max_people": result["max_people"],
+        "timeline": result["timeline"]
+    }
+
+
+@app.get("/video")
+def get_video():
+
     return FileResponse(
-        output_path,
+        "outputs/annotated.mp4",
         media_type="video/mp4",
         filename="annotated.mp4"
     )

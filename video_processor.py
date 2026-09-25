@@ -3,9 +3,9 @@ import cv2
 
 
 model = YOLO("yolo26n.pt")
-
-
 def process_video(input_path, output_path):
+
+    print("PROCESS VIDEO STARTED")
 
     cap = cv2.VideoCapture(input_path)
 
@@ -22,6 +22,15 @@ def process_video(input_path, output_path):
         (width, height)
     )
 
+    print("VideoWriter opened:", out.isOpened())
+
+    timeline = []
+
+    previous_count = -1
+    max_people = 0
+
+    frame_number = 0
+
     while True:
 
         success, frame = cap.read()
@@ -29,15 +38,23 @@ def process_video(input_path, output_path):
         if not success:
             break
 
+        frame_number += 1
+
         results = model(frame)
+
         result = results[0]
+
+        people_count = 0
 
         for box in result.boxes:
 
             class_id = int(box.cls[0].item())
+
             class_name = model.names[class_id]
 
             if class_name == "person":
+
+                people_count += 1
 
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
 
@@ -54,9 +71,28 @@ def process_video(input_path, output_path):
                     2
                 )
 
+        if people_count > max_people:
+            max_people = people_count
+
+        if people_count != previous_count:
+
+            current_time = frame_number / fps
+
+            timeline.append({
+                "time": round(current_time, 1),
+                "people": people_count
+            })
+
+            previous_count = people_count
+
         out.write(frame)
 
     cap.release()
     out.release()
 
-    return output_path
+    return {
+        "video": output_path,
+        "max_people": max_people,
+        "timeline": timeline
+    }
+
